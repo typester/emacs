@@ -1108,6 +1108,9 @@ x_set_window_size (struct frame *f, int change_grav, int cols, int rows)
 
   NSTRACE (x_set_window_size);
 
+  if ([[window className] isEqualToString:@"FullscreenWindow"])
+      return;
+
   if (view == nil ||
       (f == oldF
        && rows == oldRows && cols == oldCols
