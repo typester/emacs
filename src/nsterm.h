@@ -111,11 +111,9 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 @end
 
 // dummy for 10.5-
-#ifndef NSApplicationPresentationDefault
 #define NSApplicationPresentationDefault 0
-#define NSApplicationPresentationAutoHideDock 0
-#define NSApplicationPresentationAutoHideMenuBar 0
-#endif
+#define NSApplicationPresentationAutoHideDock (1 <<  0)
+#define NSApplicationPresentationAutoHideMenuBar (1 <<  2)
 
 /* ==========================================================================
 
