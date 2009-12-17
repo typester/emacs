@@ -1131,8 +1131,14 @@ x_set_window_size (struct frame *f, int change_grav, int cols, int rows)
   f->scroll_bar_actual_width = NS_SCROLL_BAR_WIDTH (f);
   compute_fringe_widths (f, 0);
 
-  pixelwidth =  FRAME_TEXT_COLS_TO_PIXEL_WIDTH   (f, cols);
-  pixelheight = FRAME_TEXT_LINES_TO_PIXEL_HEIGHT (f, rows);
+  if ([window isKindOfClass:[EmacsFullWindow class]]) {
+      pixelwidth = [[window screen] frame].size.width;
+      pixelheight = [[window screen] frame].size.height;
+  }
+  else {
+      pixelwidth =  FRAME_TEXT_COLS_TO_PIXEL_WIDTH   (f, cols);
+      pixelheight = FRAME_TEXT_LINES_TO_PIXEL_HEIGHT (f, rows);
+  }
 
   /* If we have a toolbar, take its height into account. */
   if (tb)
