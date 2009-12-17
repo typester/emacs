@@ -94,17 +94,21 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 @interface EmacsWindow : NSWindow
 {
   NSPoint grabOffset;
-
-  NSUInteger normalStyleMask;
-  NSRect normalFrame;
-  NSUInteger fullscreenStyleMask;
-  BOOL isFullscreen;
 }
 
--(void)toggleFullscreen;
+-(EmacsWindow *)toggleFullscreen;
 
 @end
 
+/* 10.5 or below is not supported [NSWindow setStyleMask:], so require content swap hack */
+@interface EmacsFullWindow : EmacsWindow {
+    EmacsWindow *normalWindow;
+}
+
+-(id)initWithNormalWindow:(EmacsWindow *)window;
+-(EmacsWindow *)getNormalWindow;
+
+@end
 
 /* ==========================================================================
 

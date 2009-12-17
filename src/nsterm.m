@@ -5609,60 +5609,56 @@ extern void update_window_cursor (struct window *w, int on);
 
 @implementation EmacsWindow
 
--(BOOL)canBecomeKeyWindow {
-    return YES;
-}
+-(NSWindow *)toggleFullscreen {
+    BOOL isFullscreen = [[self className] isEqualToString:@"EmacsFullWindow"];
+    NSWindow *win;
 
--(id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)windowStyle backing:(NSBackingStoreType)bufferingType defer:(BOOL)deferCreation {
-    self = [super initWithContentRect:contentRect
-                            styleMask:windowStyle
-                              backing:bufferingType
-                                defer:deferCreation];
-    if (self) {
-        normalStyleMask = windowStyle;
-        normalFrame     = [self frameRectForContentRect:contentRect];
-        fullscreenStyleMask = NSBorderlessWindowMask;
-        isFullscreen = NO;
-    }
-
-    return self;
-}
-
-
--(void)toggleFullscreen {
     if (isFullscreen) {
-        [self setStyleMask:normalStyleMask];
-        [self setFrame:normalFrame
-               display:YES
-               animate:NO];
+        EmacsFullWindow *f = (EmacsFullWindow *)self;
+        EmacsWindow *w = [f getNormalWindow];
 
-        isFullscreen = NO;
+        [w setContentView:[f contentView]];
+        [w makeKeyAndOrderFront:nil];
+
+        [f close];
+
+        win = w;
+
+        if ([[self screen] isEqual:[[NSScreen screens] objectAtIndex:0]]) {
+            if ([NSApp respondsToSelector:@selector(setPresentationOptions:)]) {
+                [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+            }
+            else {
+                [NSMenu setMenuBarVisible:YES];
+            }
+        }
     }
     else {
-        normalFrame = [self frame];
+        [self deminiaturize:nil];
 
-        [self setStyleMask:fullscreenStyleMask];
-        [self setFrame:[[self screen] frame]
-               display:YES
-               animate:NO];
-
-        isFullscreen = YES;
-    }
-
-    if ([[self screen] isEqual:[[NSScreen screens] objectAtIndex:0]]) {
-        if ([NSApp respondsToSelector:@selector(setPresentationOptions:)]) {
-            // 10.6+
-            if (isFullscreen) {
+        if ([[self screen] isEqual:[[NSScreen screens] objectAtIndex:0]]) {
+            if ([NSApp respondsToSelector:@selector(setPresentationOptions:)]) {
                 [NSApp setPresentationOptions:NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar];
             }
             else {
-                [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+                [NSMenu setMenuBarVisible:NO];
             }
         }
-        else {
-            [NSMenu setMenuBarVisible:!isFullscreen];
-        }
+
+        EmacsFullWindow *f = [[EmacsFullWindow alloc] initWithNormalWindow:self];
+        EmacsView *view = (EmacsView *)[self delegate];
+        [f setDelegate:view];
+        [f makeFirstResponder:view];
+        [f setContentView:[self contentView]];
+        [f setContentSize:[[self screen] frame].size];
+        [f setTitle:[self title]];
+        [f makeKeyAndOrderFront:nil];
+
+        [self orderOut:nil];
+        win = f;
     }
+
+    return win;
 }
 
 /* called only on resize clicks by special case in EmacsApp-sendEvent */
@@ -5722,6 +5718,32 @@ extern void update_window_cursor (struct window *w, int on);
 }
 
 @end /* EmacsWindow */
+
+@implementation EmacsFullWindow
+
+-(BOOL)canBecomeKeyWindow {
+    return YES;
+}
+
+-(id)initWithNormalWindow:(EmacsWindow *)window {
+    self = [super initWithContentRect:[window contentRectForFrameRect:[[window screen] frame]]
+                            styleMask:NSBorderlessWindowMask
+                              backing:NSBackingStoreBuffered
+                                defer:YES];
+    if (self) {
+        normalWindow = window;
+        [self setAcceptsMouseMovedEvents: YES];
+        [self useOptimizedDrawing: YES];
+    }
+
+    return self;
+}
+
+-(EmacsWindow *)getNormalWindow {
+    return normalWindow;
+}
+
+@end /* EmacsFullWindow */
 
 
 /* ==========================================================================
