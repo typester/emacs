@@ -5639,6 +5639,8 @@ extern void update_window_cursor (struct window *w, int on);
         isFullscreen = NO;
     }
     else {
+        normalFrame = [self frame];
+
         [self setStyleMask:fullscreenStyleMask];
         [self setFrame:[[self screen] frame]
                display:YES
