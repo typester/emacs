@@ -1150,7 +1150,7 @@ x_set_window_size (struct frame *f, int change_grav, int cols, int rows)
                   + FRAME_NS_TOOLBAR_HEIGHT (f);
 
   /* constrain to screen if we can */
-  if (screen)
+  if (screen && ![window isKindOfClass:[EmacsFullWindow class]])
     {
       NSSize sz = [screen visibleFrame].size;
       NSSize ez = { wr.size.width - sz.width, wr.size.height - sz.height };
