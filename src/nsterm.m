@@ -1108,9 +1108,6 @@ x_set_window_size (struct frame *f, int change_grav, int cols, int rows)
 
   NSTRACE (x_set_window_size);
 
-  if ([[window className] isEqualToString:@"FullscreenWindow"])
-      return;
-
   if (view == nil ||
       (f == oldF
        && rows == oldRows && cols == oldCols
@@ -1200,7 +1197,7 @@ x_set_window_size (struct frame *f, int change_grav, int cols, int rows)
   change_frame_size (f, rows, cols, 0, 1, 0); /* pretend, delay, safe */
   FRAME_PIXEL_WIDTH (f) = pixelwidth;
   FRAME_PIXEL_HEIGHT (f) = pixelheight;
-/*  SET_FRAME_GARBAGED (f); // this short-circuits expose call in drawRect */
+  /*  SET_FRAME_GARBAGED (f); // this short-circuits expose call in drawRect */
 
   mark_window_cursors_off (XWINDOW (f->root_window));
   cancel_mouse_face (f);
@@ -5611,6 +5608,49 @@ extern void update_window_cursor (struct window *w, int on);
    ========================================================================== */
 
 @implementation EmacsWindow
+
+-(BOOL)canBecomeKeyWindow {
+    return YES;
+}
+
+-(id)initWithContentRect:(NSRect)contentRect styleMask:(NSUInteger)windowStyle backing:(NSBackingStoreType)bufferingType defer:(BOOL)deferCreation {
+    self = [super initWithContentRect:contentRect
+                            styleMask:windowStyle
+                              backing:bufferingType
+                                defer:deferCreation];
+    if (self) {
+        normalStyleMask = windowStyle;
+        normalFrame     = [self frameRectForContentRect:contentRect];
+        fullscreenStyleMask = NSBorderlessWindowMask;
+        isFullscreen = NO;
+    }
+
+    return self;
+}
+
+
+-(void)toggleFullscreen {
+    if (isFullscreen) {
+        [self setStyleMask:normalStyleMask];
+        [self setFrame:normalFrame
+               display:YES
+               animate:NO];
+
+        isFullscreen = NO;
+    }
+    else {
+        [self setStyleMask:fullscreenStyleMask];
+        [self setFrame:[[self screen] frame]
+               display:YES
+               animate:NO];
+
+        isFullscreen = YES;
+    }
+
+    if ([[self screen] isEqual:[[NSScreen screens] objectAtIndex:0]]) {
+        [NSMenu setMenuBarVisible:!isFullscreen];
+    }
+}
 
 /* called only on resize clicks by special case in EmacsApp-sendEvent */
 - (void)mouseDown: (NSEvent *)theEvent

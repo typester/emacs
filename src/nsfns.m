@@ -2589,98 +2589,24 @@ Value is t if tooltip was open, nil otherwise.  */)
 
 #endif
 
-
-@interface FullscreenWindow : NSWindow {
-    NSWindow *original_window;
-}
-
--(BOOL)canBecomeKeyWindow;
--(NSWindow *)original;
--(void)setOriginal:(NSWindow *)win;
-
-@end
-
-@implementation FullscreenWindow
-
--(BOOL)canBecomeKeyWindow {
-    return YES;
-}
-
--(NSWindow *)original {
-    return original_window;
-}
-
--(void)setOriginal:(NSWindow *)win {
-    original_window = win;
-}
-
-@end
-
 DEFUN ("ns-toggle-fullscreen-internal", Fns_toggle_fullscreen_internal, Sns_toggle_fullscreen_internal,
        0, 0, 0,
        doc: /* Toggle fulscreen mode */)
     ()
 {
     struct frame *f = SELECTED_FRAME();
-    NSWindow *mainWindow = ns_get_window(f);
+    EmacsWindow *window = ns_get_window(f);
 
-    if ([[mainWindow className] isEqualToString:@"EmacsWindow"]) {
-        if ([[mainWindow screen] isEqual:[[NSScreen screens] objectAtIndex:0]]) {
-            [NSMenu setMenuBarVisible:NO];
-        }
+    [window toggleFullscreen];
 
-        FullscreenWindow *fullscreenWindow =
-            [[FullscreenWindow alloc]
-               initWithContentRect:[mainWindow contentRectForFrameRect:
-                                                   [mainWindow frame]]
-                         styleMask:NSBorderlessWindowMask
-                           backing:NSBackingStoreBuffered
-                             defer:YES];
+    NSRect r = [window contentRectForFrameRect:[window frame]];
 
-        //    [fullscreenWindow setLevel:NSFloatingWindowLevel];
-        [fullscreenWindow setContentView:[mainWindow contentView]];
-        [fullscreenWindow setTitle:[mainWindow title]];
-        [fullscreenWindow makeKeyAndOrderFront:nil];
+    int cols = FRAME_PIXEL_WIDTH_TO_TEXT_COLS(f, r.size.width);
+    int rows = FRAME_PIXEL_HEIGHT_TO_TEXT_LINES(f, r.size.height);
 
-        CGRect r = [[mainWindow screen] frame];
-        [fullscreenWindow setFrame:[fullscreenWindow frameRectForContentRect:r]
-                           display:YES
-                           animate:NO];
-        [mainWindow orderOut:nil];
-        [fullscreenWindow setOriginal:mainWindow];
-
-        int cols = FRAME_PIXEL_WIDTH_TO_TEXT_COLS(f, r.size.width);
-        int rows = FRAME_PIXEL_HEIGHT_TO_TEXT_LINES(f, r.size.height);
-
-        change_frame_size (f, rows, cols, 0, 1, 0); /* pretend, delay, safe */
-        FRAME_PIXEL_WIDTH (f) = (int)r.size.width;
-        FRAME_PIXEL_HEIGHT (f) = (int)r.size.height;
-    }
-    else {
-        FullscreenWindow *fullscreenWindow = (FullscreenWindow *)mainWindow;
-        EmacsWindow *window = [mainWindow original];
-
-        CGRect r = [fullscreenWindow frameRectForContentRect:
-                         [mainWindow contentRectForFrameRect:[mainWindow frame]]];
-        NSRect cr = [window contentRectForFrameRect:[window frame]];
-
-        [fullscreenWindow setFrame:r display:YES animate:NO];
-
-        [window setContentView:[fullscreenWindow contentView]];
-        [window makeKeyAndOrderFront:nil];
-        [fullscreenWindow close];
-
-        if ([[window screen] isEqual:[[NSScreen screens] objectAtIndex:0]]) {
-            [NSMenu setMenuBarVisible:YES];
-        }
-
-        int cols = FRAME_PIXEL_WIDTH_TO_TEXT_COLS(f, cr.size.width);
-        int rows = FRAME_PIXEL_HEIGHT_TO_TEXT_LINES(f, cr.size.height);
-
-        change_frame_size (f, rows, cols, 0, 1, 0); /* pretend, delay, safe */
-        FRAME_PIXEL_WIDTH (f) = (int)cr.size.width;
-        FRAME_PIXEL_HEIGHT (f) = (int)cr.size.height;
-    }
+    change_frame_size (f, rows, cols, 0, 1, 0); /* pretend, delay, safe */
+    FRAME_PIXEL_WIDTH (f) = (int)r.size.width;
+    FRAME_PIXEL_HEIGHT (f) = (int)r.size.height;
 
     return Qnil;
 }

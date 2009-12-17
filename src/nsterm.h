@@ -94,7 +94,15 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 @interface EmacsWindow : NSWindow
 {
   NSPoint grabOffset;
+
+  NSUInteger normalStyleMask;
+  NSRect normalFrame;
+  NSUInteger fullscreenStyleMask;
+  BOOL isFullscreen;
 }
+
+-(void)toggleFullscreen;
+
 @end
 
 
