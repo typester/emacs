@@ -5648,7 +5648,18 @@ extern void update_window_cursor (struct window *w, int on);
     }
 
     if ([[self screen] isEqual:[[NSScreen screens] objectAtIndex:0]]) {
-        [NSMenu setMenuBarVisible:!isFullscreen];
+        if ([NSApp respondsToSelector:@selector(setPresentationOptions:)]) {
+            // 10.6+
+            if (isFullscreen) {
+                [NSApp setPresentationOptions:NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar];
+            }
+            else {
+                [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+            }
+        }
+        else {
+            [NSMenu setMenuBarVisible:!isFullscreen];
+        }
     }
 }
 
