@@ -110,11 +110,26 @@ along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.  */
 
 @end
 
-// dummy for 10.5-
-#ifndef NSApplicationPresentationDefault
-#define NSApplicationPresentationDefault 0
-#define NSApplicationPresentationAutoHideDock 0
-#define NSApplicationPresentationAutoHideMenuBar 0
+// dummy definitions for 10.5-
+#ifndef NSApplicationPresentationOptions
+
+/* Flags that comprise an application's presentationOptions */
+enum {
+    NSApplicationPresentationDefault                    = 0,
+    NSApplicationPresentationAutoHideDock               = (1 <<  0),    // Dock appears when moused to
+    NSApplicationPresentationHideDock                   = (1 <<  1),    // Dock is entirely unavailable
+
+    NSApplicationPresentationAutoHideMenuBar            = (1 <<  2),    // Menu Bar appears when moused to
+    NSApplicationPresentationHideMenuBar                = (1 <<  3),    // Menu Bar is entirely unavailable
+
+    NSApplicationPresentationDisableAppleMenu           = (1 <<  4),    // all Apple menu items are disabled
+    NSApplicationPresentationDisableProcessSwitching    = (1 <<  5),    // Cmd+Tab UI is disabled
+    NSApplicationPresentationDisableForceQuit           = (1 <<  6),    // Cmd+Opt+Esc panel is disabled
+    NSApplicationPresentationDisableSessionTermination  = (1 <<  7),    // PowerKey panel and Restart/Shut Down/Log Out disabled
+    NSApplicationPresentationDisableHideApplication     = (1 <<  8),    // Application "Hide" menu item is disabled
+    NSApplicationPresentationDisableMenuBarTransparency = (1 <<  9)     // Menu Bar's transparent appearance is disabled
+};
+
 #endif
 
 /* ==========================================================================
@@ -808,7 +823,6 @@ extern char gnustep_base_version[];  /* version tracking */
 
 /* needed somewhere... */
 #define VERTICAL_SCROLL_BAR_WIDTH_TRIM (0)
-
 
 #endif	/* HAVE_NS */
 
