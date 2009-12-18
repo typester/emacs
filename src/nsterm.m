@@ -5651,6 +5651,8 @@ extern void update_window_cursor (struct window *w, int on);
             }
         }
 
+        [self orderOut:nil];
+
         EmacsFullWindow *f = [[EmacsFullWindow alloc] initWithNormalWindow:self];
         EmacsView *view = (EmacsView *)[self delegate];
         [f setDelegate:view];
@@ -5660,7 +5662,6 @@ extern void update_window_cursor (struct window *w, int on);
         [f setTitle:[self title]];
         [f makeKeyAndOrderFront:nil];
 
-        [self orderOut:nil];
         win = f;
     }
 
