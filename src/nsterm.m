@@ -4483,7 +4483,7 @@ extern void update_window_cursor (struct window *w, int on);
              code, fnKeysym, flags, emacs_event->modifiers);
 
       /* if it was a function key or had modifiers, pass it directly to emacs */
-      if (fnKeysym || (emacs_event->modifiers
+  if (fnKeysym || (emacs_event->modifiers && (emacs_event->modifiers != shift_modifier)
                        && [[theEvent charactersIgnoringModifiers] length] > 0))
 /*[[theEvent characters] length] */
         {
