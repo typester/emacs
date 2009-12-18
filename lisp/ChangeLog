@@ -1,3 +1,57 @@
+2009-12-17  Michael Albinus  <michael.albinus@gmx.de>
+
+	Make `file-expand-wildcards' work for remote files.
+
+	* files.el (file-expand-wildcards): In case of remote files, check
+	only local file name part for wildcards.  Provide feature 'files
+	and subfeature 'remote-wildcards.  (Bug#5198)
+
+	* net/tramp.el (tramp-handle-file-remote-p): Expand file name only
+	if there is already an established connection.
+	(tramp-advice-file-expand-wildcards): Remove it.
+
+	* net/tramp-compat.el (top): Autoload `tramp-handle-file-remote-p'.
+	(tramp-advice-file-expand-wildcards): Moved from tramp.el.
+	Activate advice for older GNU Emacs versions.  (Bug#5237)
+
+2009-12-17  Juanma Barranquero  <lekktu@gmail.com>
+
+	Some doc fixes (more needed).
+
+	* find-cmd.el (find-constituents): Reflow docstring.
+	(find-cmd, find-prune, find-command): Fix typos in docstrings.
+	(find-generic): Doc fix.
+
+2009-12-17  Juri Linkov  <juri@jurta.org>
+
+	Fix regression from 23.1 to allow multiple modes in Local Variables.
+
+	* files.el (hack-local-variables-filter): While ignoring duplicates,
+	don't take `mode' into account.
+	(hack-local-variables-filter, hack-dir-local-variables): Don't
+	remove duplicate `mode' from local-variables-alist (like `eval').
+
+2009-12-17  Juri Linkov  <juri@jurta.org>
+
+	Make `dired-diff' more safe.  (Bug#5225)
+
+	* dired-aux.el (dired-diff): Signal an error when `file' equals to
+	`current' or when `file' is a directory of the `current' file.
+
+2009-12-17  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* emacs-lisp/autoload.el (batch-update-autoloads): Only exclude
+	unconditionally preloaded files.
+
+2009-12-16  Juri Linkov  <juri@jurta.org>
+
+	Revert to old 23.1 logic of using the file at the mark as default.
+	* dired-aux.el (dired-diff): Use the file at the mark as default
+	if it's not the same as the current file, and the target dir is
+	the current dir or the mark is active.  Add the current file
+	as the arg of `dired-dwim-target-defaults'.  Use the default file
+	in the prompt.  (Bug#5225)
+
 2009-12-15  Michael Albinus  <michael.albinus@gmx.de>
 
 	* net/tramp.el (tramp-echo-mark-marker-length): New defconst.
@@ -631,7 +685,7 @@
 
 	* progmodes/cc-mode.el (c-basic-common-init):
 	Call c-state-cache-init.
-	(c-neutralize-syntax-in-and-mark-CPP):  Rename from
+	(c-neutralize-syntax-in-and-mark-CPP): Rename from
 	c-extend-and-neutralize-syntax-in-CPP.  Mark each CPP construct by
 	placing `category' properties value 'c-cpp-delimiter at its boundaries.
 
