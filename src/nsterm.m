@@ -686,6 +686,13 @@ ns_focus (struct frame *f, NSRect *r, int n)
 /*debug_lock--; */
             }
 
+          if (view) {
+              EmacsFullWindow *win = [view window];
+              if ([win isKindOfClass:[EmacsFullWindow class]]) {
+                  [[win getNormalWindow] orderOut:nil];
+              }
+          }
+
           if (view)
 #ifdef NS_IMPL_GNUSTEP
             r ? [view lockFocusInRect: u] : [view lockFocus];
