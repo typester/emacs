@@ -5120,6 +5120,7 @@ ns_term_shutdown (int sig)
   [win setAcceptsMouseMovedEvents: YES];
   [win setDelegate: self];
   [win useOptimizedDrawing: YES];
+  [win setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
 
   sz.width = FRAME_COLUMN_WIDTH (f);
   sz.height = FRAME_LINE_HEIGHT (f);
@@ -5607,6 +5608,43 @@ ns_term_shutdown (int sig)
 {
   rows = r;
   cols = c;
+}
+
+- (NSApplicationPresentationOptions)window:(NSWindow *)window willUseFullScreenPresentationOptions:(NSApplicationPresentationOptions)proposedOptions {
+    return proposedOptions | NSApplicationPresentationAutoHideToolbar;
+}
+
+- (NSSize)window:(NSWindow *)window willUseFullScreenContentSize:(NSSize)proposedSize {
+    NSRect r = NSMakeRect(0.f, 0.f, proposedSize.width, proposedSize.height);
+    int cols = FRAME_PIXEL_WIDTH_TO_TEXT_COLS(emacsframe, r.size.width);
+    int rows = FRAME_PIXEL_HEIGHT_TO_TEXT_LINES(emacsframe, r.size.height);
+
+    change_frame_size (emacsframe, rows, cols, 0, 1, 0); /* pretend, delay, safe */
+    FRAME_PIXEL_WIDTH (emacsframe) = (int)r.size.width;
+    FRAME_PIXEL_HEIGHT (emacsframe) = (int)r.size.height;
+
+    emacsframe->border_width = [window frame].size.width - r.size.width;
+    FRAME_NS_TITLEBAR_HEIGHT (emacsframe) = 0;
+
+    return proposedSize;
+}
+
+- (void)windowDidExitFullScreen:(NSNotification *)notification {
+    NSWindow* window = [notification object];
+
+    NSRect r = [window contentRectForFrameRect:[window frame]];
+    int cols = FRAME_PIXEL_WIDTH_TO_TEXT_COLS(emacsframe, r.size.width);
+    int rows = FRAME_PIXEL_HEIGHT_TO_TEXT_LINES(emacsframe, r.size.height);
+
+    change_frame_size (emacsframe, rows, cols, 0, 1, 0); /* pretend, delay, safe */
+    FRAME_PIXEL_WIDTH (emacsframe) = (int)r.size.width;
+    FRAME_PIXEL_HEIGHT (emacsframe) = (int)r.size.height;
+
+    emacsframe->border_width = [window frame].size.width - r.size.width;
+    FRAME_NS_TITLEBAR_HEIGHT (emacsframe) =
+        [window frame].size.height - r.size.height;
+
+    [[window delegate] windowDidMove:nil];
 }
 
 @end  /* EmacsView */
