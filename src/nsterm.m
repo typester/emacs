@@ -5106,7 +5106,8 @@ ns_term_shutdown (int sig)
 
   win = [[EmacsWindow alloc]
             initWithContentRect: r
-                      styleMask: (NSResizableWindowMask |
+                      styleMask: (NSTitledWindowMask |
+                                  NSResizableWindowMask |
                                   NSMiniaturizableWindowMask |
                                   NSClosableWindowMask)
                         backing: NSBackingStoreBuffered
